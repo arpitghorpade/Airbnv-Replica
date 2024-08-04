@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const dotenv = require("dotenv");
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const path = require("path");
 const methodOverride = require("method-override");
@@ -7,8 +8,9 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/expressError.js");
 const { listingSchema } = require("./schema.js");
+dotenv.config();
 
-const uri = "mongodb+srv://arpitghorpade930:MVJMNe7CvJMCdtNX@cluster0.1qiqk01.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_ATLAS_URI;
 
 const client = new MongoClient(uri, {
   serverApi: {

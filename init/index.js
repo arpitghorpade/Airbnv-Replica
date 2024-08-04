@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 // Uncomment this to use local MongoDB
 // const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
 // MongoDB Atlas connection URI
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://arpitghorpade930:MVJMNe7CvJMCdtNX@cluster0.1qiqk01.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_ATLAS_URI;
 
 // Mongoose connection options
 const mongooseOptions = {
