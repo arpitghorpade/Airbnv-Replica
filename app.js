@@ -1,6 +1,6 @@
-const express = require("express");
-const app = express();
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const path = require("path");
 const methodOverride = require("method-override");
@@ -8,10 +8,13 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/expressError.js");
 const { listingSchema } = require("./schema.js");
+const initData = require("./init/data.js");
+const Listing = require("./models/listing.js");
+
 dotenv.config();
 
+const app = express();
 const uri = process.env.MONGO_ATLAS_URI;
-
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -19,6 +22,37 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+
+async function main() {
+  try {
+    await mongoose.connect(uri, mongooseOptions);
+    console.log("Connected to DB");
+
+    await initDB();
+    console.log("Data was initialized");
+
+    mongoose.connection.close();
+  } catch (err) {
+    console.error("Error connecting to the database or initializing data:", err);
+    mongoose.connection.close();
+  }
+}
+
+const initDB = async () => {
+  try {
+    await Listing.deleteMany({});
+    await Listing.insertMany(initData.data);
+  } catch (err) {
+    console.error("Error initializing data:", err);
+  }
+};
+
+main();
 
 async function connectDB() {
   try {
@@ -53,7 +87,7 @@ const validateListing = (req, res, next) => {
   }
 };
 
-// index Route
+// Index Route
 app.get("/listings", wrapAsync(async (req, res) => {
   const listingsCollection = client.db("wanderlust").collection("listings");
   const allListings = await listingsCollection.find({}).toArray();
@@ -65,7 +99,7 @@ app.get("/listings/new", (req, res) => {
   res.render("listings/new.ejs");
 });
 
-// show Route
+// Show Route
 app.get("/listings/:id", wrapAsync(async (req, res) => {
   const { id } = req.params;
   const listingsCollection = client.db("wanderlust").collection("listings");
